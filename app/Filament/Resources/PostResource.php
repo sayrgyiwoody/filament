@@ -2,35 +2,36 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms;
+use App\Models\Post;
+use Filament\Tables;
+use App\Models\Category;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Checkbox;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Columns\CheckboxColumn;
+use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\PostResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PostResource\RelationManagers;
 use App\Filament\Resources\PostResource\RelationManagers\AuthorsRelationManager;
 use App\Filament\Resources\PostResource\RelationManagers\CommentsRelationManager;
-use App\Models\Category;
-use App\Models\Post;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\MarkdownEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\CheckboxColumn;
-use Filament\Tables\Columns\ColorColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PostResource extends Resource
 {
@@ -47,7 +48,11 @@ class PostResource extends Resource
                 Section::make('Create a post')
                     ->description('Create post over here')
                     ->schema([
-                        TextInput::make('title')->required(),
+                        TextInput::make('title')->required()->minLength(1)->maxLength(150)
+                        ->live(onBlur:true)
+                        ->afterStateUpdated(function(string $operation,string $state,Forms\Set $set){
+                            $set('slug',Str::slug($state));
+                        }),
                         TextInput::make('slug')->unique(ignoreRecord: true)->required(),
 
                         Select::make('category_id')
