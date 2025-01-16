@@ -2,20 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use App\Filament\Exports\UserExporter;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ExportAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ExportBulkAction;
+use App\Filament\Resources\UserResource\Pages;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\UserResource\RelationManagers;
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class UserResource extends Resource
 {
@@ -49,18 +53,20 @@ class UserResource extends Resource
                 TextColumn::make('id')
                     ->toggleable(),
                 TextColumn::make('name')
-                    ->sortable()->searchable()->toggleable(),
+                    ->sortable()->searchable()
+                    ->toggleable(),
                 TextColumn::make('email')
-                    ->sortable()->searchable()->toggleable(),
+                    ->sortable()->searchable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->sortable()
-                    ->dateTime()->toggleable(isToggledHiddenByDefault:true),
+                    ->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('role')
-                    ->color(function(string $state) : string{
-                        return match($state){
+                    ->color(function (string $state): string {
+                        return match ($state) {
                             'ADMIN' => 'danger',
                             'EDITOR' => 'info',
-                            'USER' => 'success'
+                            'USER' => 'success',
                         };
                     })
                     ->badge()->sortable()->toggleable(),
@@ -71,10 +77,22 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(UserExporter::class)
+                    ->formats([
+                        ExportFormat::Csv
+                    ])
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                ExportBulkAction::make()
+                    ->exporter(UserExporter::class)
+                    ->formats([
+                        ExportFormat::Csv
+                    ])
             ]);
     }
 

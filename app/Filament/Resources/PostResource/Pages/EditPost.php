@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\PostResource\Pages;
 
-use App\Filament\Resources\PostResource;
 use Filament\Actions;
+use App\Filament\Resources\PostResource;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\UserResource\Widgets\PostHello;
 
 class EditPost extends EditRecord
 {
@@ -16,4 +17,6 @@ class EditPost extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+
 }
